@@ -19,12 +19,16 @@ sub mk_classdata {
         
         if(@_==3) {
             my $current = $data;
-            $_[2] = End::end { $data = $current }
+            $_[2] = End::end { $data = $current };
+            
+            if($wantclass ne $declaredclass){
+                return $wantclass->mk_classdata($attribute,$data)->(@_);
+            }
         }
-
-        return $wantclass->mk_classdata($attribute)->(@_)
-          if @_>1 && $wantclass ne $declaredclass;
-
+        else {
+            return $wantclass->mk_classdata($attribute)->(@_)
+              if @_>1 && $wantclass ne $declaredclass;
+        }
         $data = $_[1] if @_>1;
         return $data;
     };
@@ -38,14 +42,6 @@ sub mk_classdata {
 
 __END__
 
-        #$data = $_[1] if @_>1;
-        $classdata{$wantclass}{$attribute} = $_[1] if @_>1;
-        for my $class ($wantclass,@{join('::',$wantclass,'ISA')})
-            { return $classdata{$class}{$attribute}
-                if exists $classdata{$class}{$attribute}
-            }
-        return
-        
 =head1 NAME
 
 Class::Data::Localize - Localizable, Inheritable, overridable class data
@@ -65,6 +61,16 @@ Class::Data::Localize - Localizable, Inheritable, overridable class data
   Stuff->mk_classdata(DataFile => '/etc/stuff/data');
 
 =head1 DESCRIPTION
+
+Problem: wenn eine Subklasse den Wert lokalisiert wird ein Accessor erzeugt -
+         nach dem Ende der Lokalisierung aber nicht der korrekte Wert hergestellt.
+         
+Note that there is an alternative module for End called ReleaseAction
+which features a cancel method -> FEATURE FEATURE FEATURE
+-0.07
+         
+Fix ist einfacher als Test.
+
 
 Class::Data::Inheritable is for creating accessor/mutators to class
 data.  That is, if you want to store something about your class as a
