@@ -1,5 +1,5 @@
 use strict;
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 package Ray;
 use base qw(Class::Data::Localize);
@@ -37,4 +37,24 @@ is +Ray->Ubu, undef, "But not set in parent";
   is +Gun->Ubu,'Tremolo', 'Outer localized value'; 
 };
 
+package Prince;
+use base qw(Class::Data::Localize);
 
+# Set up HomeDir as localizable, inheritable class data.
+Prince->mk_classdata('HomeDir');
+
+sub kiss { $_[1] =~ /ess$/ }
+
+package main;
+
+# Declare the location of the home dir for this class.
+Prince->HomeDir('/wooden/house');
+
+# Teporary move to
+{ Prince->HomeDir('/stone/castle',my $move);
+  if(Prince->kiss('princess')) {
+          $move->cancel ;    
+  }
+};
+     
+is +Prince->HomeDir,'/stone/castle','canceled localization';

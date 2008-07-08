@@ -2,7 +2,7 @@ package Class::Data::Localize;
 
 use strict qw(vars subs);
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 use ReleaseAction ();
 
@@ -19,7 +19,7 @@ sub mk_classdata {
         
         if(@_==3) {
             my $current = $data;
-            $_[2] = End::end { $data = $current };
+            $_[2] = ReleaseAction->new( sub { $data = $current } );
             
             if($wantclass ne $declaredclass){
                 return $wantclass->mk_classdata($attribute,$data)->(@_);
@@ -44,25 +44,28 @@ __END__
 
 =head1 NAME
 
-Class::Data::Localize - Localizable, Inheritable, overridable class data
+Class::Data::Localize - Localizable, inheritable, overridable class data
 
 =head1 SYNOPSIS
 
-  package Stuff;
+  package Prince;
   use base qw(Class::Data::Localize);
 
-  # Set up DataFile as inheritable class data.
-  Stuff->mk_classdata('HomeDir');
+  # Set up HomeDir as localizable, inheritable class data.
+  Prince->mk_classdata('HomeDir');
 
-  # Declare the location of the data file for this class.
-  Stuff->HomeDir('/wooden/house/');
+  # Declare the location of the home dir for this class.
+  Prince->HomeDir('/wooden/house/');
 
   # Teporary move to
-     { Stuff->HomeDir('/stone/castle',my $move)
-     ...
-     }
+     { Prince->HomeDir('/stone/castle',my $move);
+       if(Prince->kiss("princess")) {
+          $move->cancel
+          # live happy in stone castle until end of time     
+       }
+     };
      
-  print Stuff->HomeDir; # back in /wooden/house
+  print Prince->HomeDir; # back in /wooden/house when no kiss
   
 =head1 DESCRIPTION
 
@@ -70,17 +73,27 @@ This is an alternative to Class::Data::Inheritable with the feature
 added, that the class data can be localized, similar to the function
 of the keyword C<local>.
 
-It is mostly compatible with C::D::I but attention should on the
-prameter list. If an accessor is called with an array as argument list,
+=head2 Class Method C<mk_classdata>
+
+This class method works the same way as in C::D::I.
+
+=head2 Compatibility
+
+It is mostly compatible with C::D::I but attention should on the accessor
+parameter list. If an accessor is called with an array as argument list,
 than a move to this module will break your code.
 
    Stuff->DataFile(@args); # make sure @args <= 1 or
                            # unwanted things will happen
+                    
+=head2 Localize Class Data                    
                            
 To localize a value give the accessor a lexical variable as second 
 argument. Under the hood this module uses than the function of 
-L<ReleaseAction> to provide the feature. This let's cancel the
-localization before the variable goes out of scope.
+L<ReleaseAction> to provide the feature. It stores in the variable an
+ReleaseAction object. This let's cancel the localization before the 
+variable goes out of scope. When canceled the localized value becomes 
+the new persistent value.
 
 =head1 SEE ALSO
 
@@ -91,6 +104,10 @@ localization before the variable goes out of scope.
 =item L<Class::Data::Inheritable>
 
 =back
+
+=head1 TODO
+
+   * to cancel the localization is untested
 
 =head1 AUTHOR
 
@@ -103,6 +120,11 @@ Class::Data::Inheritable is maintained by Tony Bowden.
 Derived Class::Data::Localize by Sebastian Knapp
 
 =head1 BUGS
+
+Class::Data::Inheritable and Class::Data::Localize can't be used
+together easily. This was an early design decision which is maybe wrong.
+
+Possible more.
 
 Please report any bugs or feature requests to
 C<bug-package-subroutine@rt.cpan.org>, or through the web interface at
