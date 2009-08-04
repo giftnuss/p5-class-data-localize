@@ -3,8 +3,8 @@ use Test::More tests => 9;
 
 package Ray;
 use base qw(Class::Data::Localize);
-Ray->mk_classdata('Ubu');
-Ray->mk_classdata(DataFile => '/etc/stuff/data');
+Ray->class_accessor('Ubu');
+Ray->class_accessor(DataFile => '/etc/stuff/data');
 
 package Gun;
 use base qw(Ray);
@@ -41,7 +41,7 @@ package Prince;
 use base qw(Class::Data::Localize);
 
 # Set up HomeDir as localizable, inheritable class data.
-Prince->mk_classdata('HomeDir');
+Prince->class_accessor('HomeDir');
 
 sub kiss { $_[1] =~ /ess$/ }
 

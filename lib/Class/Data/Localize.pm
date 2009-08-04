@@ -2,40 +2,72 @@ package Class::Data::Localize;
 
 use strict qw(vars subs);
 use vars qw($VERSION);
-$VERSION = '0.02';
+$VERSION = '0.03_1';
 
 use ReleaseAction ();
+use Data::Dumper;
+my ($lastclass, $lastattr);
+our $warn_redefine = 1;
 
-sub mk_classdata {
+sub class_accessor {
     my ($declaredclass, $attribute, $data) = @_;
+    ($lastclass, $lastattr) = ($declaredclass, $attribute);
 
     if( ref $declaredclass ) {
         require Carp;
-        Carp::croak("mk_classdata() is a class method, not an object method");
+        Carp::croak("class_accessor() is a class method, not an object method");
     }
 
     my $accessor = sub {
         my $wantclass = ref($_[0]) || $_[0];
-        
+
         if(@_==3) {
             my $current = $data;
             $_[2] = ReleaseAction->new( sub { $data = $current } );
-            
+
             if($wantclass ne $declaredclass){
-                return $wantclass->mk_classdata($attribute,$data)->(@_);
+                shift();
+                $wantclass->class_accessor($attribute,$data);
+                return $wantclass->$attribute(@_);
             }
         }
         else {
-            return $wantclass->mk_classdata($attribute)->(@_)
-              if @_>1 && $wantclass ne $declaredclass;
+            if(@_>1 && $wantclass ne $declaredclass) {
+                shift();
+                $wantclass->class_accessor($attribute);
+                return $wantclass->$attribute(@_)
+            }
         }
         $data = $_[1] if @_>1;
         return $data;
     };
 
     my $alias = "_${attribute}_accessor";
-    *{$declaredclass.'::'.$attribute} = $accessor;
-    *{$declaredclass.'::'.$alias}     = $accessor;
+    if($warn_redefine) {
+        *{$declaredclass.'::'.$attribute} = $accessor;
+        *{$declaredclass.'::'.$alias}     = $accessor;
+    }
+    else {
+        no warnings 'redefine';
+        *{$declaredclass.'::'.$attribute} = $accessor;
+        *{$declaredclass.'::'.$alias}     = $accessor;
+    }
+    return __PACKAGE__;
+}
+
+; sub lazy_default {
+    my ($self,$code) = @_;
+    my $accessor = \&{$lastclass.'::'.$lastattr};
+    my ($class,$attr) = ($lastclass,$lastattr);
+    unless(defined $accessor->($lastclass)) {
+        no warnings 'redefine';
+        *{$lastclass.'::'.$lastattr} = sub {
+            local $warn_redefine;
+            $class->class_accessor($attr,$code->());
+            $class->$attr;
+        }
+    }
+    return __PACKAGE__;
 }
 
 1;
@@ -136,7 +168,7 @@ automatically be notified of progress on your bug as I make changes.
 Copyleft 2007-2008 Sebastian Knapp <sk@computer-leipzig.com>
 
 This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+under the same terms as Perl 5 itself.
 
 =cut
 
