@@ -10,7 +10,7 @@ our $warn_redefine = 1;
 
 our %methods;
 %methods = (
-    lazy_default => sub {
+    'lazy_default' => sub {
         my ($declaredclass,$attr,$code) = @_;
         my $default;
         $default = sub {
@@ -31,7 +31,7 @@ our %methods;
         return $default;
     },
 
-    class_accessor => sub {
+    'class_accessor' => sub {
         my ($declaredclass, $attribute,$data) = @_;
 
         my $accessor;
@@ -160,6 +160,17 @@ ReleaseAction object. This let's cancel the localization before the
 variable goes out of scope. When canceled the localized value becomes 
 the new persistent value.
 
+=head2 Lazy Default Value
+
+With version 0.3 a new feature is added.
+
+   Class->mk_classdata('attribute',default => sub { ... });
+
+The return value of the code reference will be used as default value
+when the accessor is called with an undefined value the first time. This
+works together with the localize class data feature, but not
+perfectly. Inheritance needs more tests when both play together.
+
 =head1 SEE ALSO
 
 =over 4
@@ -169,10 +180,6 @@ the new persistent value.
 =item L<Class::Data::Inheritable>
 
 =back
-
-=head1 TODO
-
-   * to cancel the localization is untested
 
 =head1 AUTHOR
 
@@ -189,7 +196,11 @@ Derived Class::Data::Localize by Sebastian Knapp
 Class::Data::Inheritable and Class::Data::Localize can't be used
 together easily. This was an early design decision which is maybe wrong.
 
-Possible more.
+Expect more when lazy default is used together with localization.
+
+=head1 TODO
+
+Test and fix localization with inheritance and lazy defaults.
 
 Please report any bugs or feature requests to
 C<bug-package-subroutine@rt.cpan.org>, or through the web interface at
@@ -198,7 +209,7 @@ automatically be notified of progress on your bug as I make changes.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyleft 2007-2008 Sebastian Knapp <sk@computer-leipzig.com>
+Copyleft 2007-2009 Sebastian Knapp <sk@computer-leipzig.com>
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl 5 itself.

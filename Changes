@@ -1,5 +1,11 @@
 Changes of Class-Data-Localize
 ##############################
+0.03_2 - 2009-08-22
+   * refactoring
+   * some tests with lazy default values
+
+0.03_1 - 2009-08-05
+   * start lazy default values
 
 0.02 - 2008-07-08
    * fixed some of the distribution errors 
