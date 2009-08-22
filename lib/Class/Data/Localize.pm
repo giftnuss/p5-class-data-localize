@@ -2,73 +2,106 @@ package Class::Data::Localize;
 
 use strict qw(vars subs);
 use vars qw($VERSION);
-$VERSION = '0.03_1';
+$VERSION = '0.03_2';
 
 use ReleaseAction ();
-use Data::Dumper;
-my ($lastclass, $lastattr);
+
 our $warn_redefine = 1;
 
-sub class_accessor {
-    my ($declaredclass, $attribute, $data) = @_;
-    ($lastclass, $lastattr) = ($declaredclass, $attribute);
+our %methods;
+%methods = (
+    lazy_default => sub {
+        my ($declaredclass,$attr,$code) = @_;
+        my $default;
+        $default = sub {
+            my $wantclass = ref($_[0]) || $_[0];
+            $_[1] = $code->() unless defined $_[1];
 
-    if( ref $declaredclass ) {
-        require Carp;
-        Carp::croak("class_accessor() is a class method, not an object method");
-    }
-
-    my $accessor = sub {
-        my $wantclass = ref($_[0]) || $_[0];
-
-        if(@_==3) {
-            my $current = $data;
-            $_[2] = ReleaseAction->new( sub { $data = $current } );
-
-            if($wantclass ne $declaredclass){
-                shift();
-                $wantclass->class_accessor($attribute,$data);
-                return $wantclass->$attribute(@_);
+            if(@_==3) {
+               $_[2] = ReleaseAction->new(sub {
+                   local $warn_redefine;
+                   $methods{'make_accessor'}->($wantclass,$attr,$default);
+               });
             }
+            local $warn_redefine;
+            $methods{'mk_classdata'}->($wantclass,$attr,$_[1]);
+            shift;
+            return $wantclass->$attr(@_);
+        };
+        return $default;
+    },
+
+    class_accessor => sub {
+        my ($declaredclass, $attribute,$data) = @_;
+
+        my $accessor;
+        $accessor = sub {
+            my $wantclass = ref($_[0]) || $_[0];
+            if(@_==3) {
+                my $current = $data;
+                my $stacked = $_[2]; # maybe a lazy default release action
+                $_[2] = ReleaseAction->new(sub { 
+                    $data = $current;
+                    undef($stacked); 
+                });
+
+                if($wantclass ne $declaredclass){
+                    shift();
+                    $methods{'mk_classdata'}->($wantclass,$attribute,$data);
+                    return $wantclass->$attribute(@_);
+                }
+            }
+            else {
+                if(@_>1 && $wantclass ne $declaredclass) {
+                    shift();
+                    $methods{'mk_classdata'}->($wantclass,$attribute);
+                    return $wantclass->$attribute(@_)
+                }
+            }
+            $data = $_[1] if @_>1;
+            return $data;
+        };
+        return $accessor;
+    },
+
+    'make_accessor' => sub {
+        my ($declaredclass,$attribute,$accessor) = @_;
+
+        my $alias = "_${attribute}_accessor";
+        if($warn_redefine) {
+            *{$declaredclass.'::'.$attribute} = $accessor;
+            *{$declaredclass.'::'.$alias}     = $accessor;
         }
         else {
-            if(@_>1 && $wantclass ne $declaredclass) {
-                shift();
-                $wantclass->class_accessor($attribute);
-                return $wantclass->$attribute(@_)
-            }
+            no warnings 'redefine';
+            *{$declaredclass.'::'.$attribute} = $accessor;
+            *{$declaredclass.'::'.$alias}     = $accessor;
         }
-        $data = $_[1] if @_>1;
-        return $data;
-    };
+    },
 
-    my $alias = "_${attribute}_accessor";
-    if($warn_redefine) {
-        *{$declaredclass.'::'.$attribute} = $accessor;
-        *{$declaredclass.'::'.$alias}     = $accessor;
-    }
-    else {
-        no warnings 'redefine';
-        *{$declaredclass.'::'.$attribute} = $accessor;
-        *{$declaredclass.'::'.$alias}     = $accessor;
-    }
-    return __PACKAGE__;
-}
+    'mk_classdata' => sub {
+        my ($declaredclass, $attribute,@args) = @_;
 
-; sub lazy_default {
-    my ($self,$code) = @_;
-    my $accessor = \&{$lastclass.'::'.$lastattr};
-    my ($class,$attr) = ($lastclass,$lastattr);
-    unless(defined $accessor->($lastclass)) {
-        no warnings 'redefine';
-        *{$lastclass.'::'.$lastattr} = sub {
-            local $warn_redefine;
-            $class->class_accessor($attr,$code->());
-            $class->$attr;
+        if( ref $declaredclass ) {
+            require Carp;
+            Carp::croak("mk_classdata() is a class method, not an object method");
         }
+        my ($accessor);
+        if(@args > 1) {
+            my %args = @args;
+            my $code = $args{'default'};
+
+            $methods{'mk_classdata'}->($declaredclass, $attribute, undef);
+            $accessor = $methods{'lazy_default'}->($declaredclass, $attribute, $code);
+        }
+        else {
+            $accessor = $methods{'class_accessor'}->($declaredclass, $attribute, $args[0]);
+        }
+        $methods{'make_accessor'}->($declaredclass,$attribute,$accessor)
     }
-    return __PACKAGE__;
-}
+);
+
+*mk_classdata = $methods{'mk_classdata'}; 
 
 1;
 
@@ -93,12 +126,12 @@ Class::Data::Localize - Localizable, inheritable, overridable class data
      { Prince->HomeDir('/stone/castle',my $move);
        if(Prince->kiss("princess")) {
           $move->cancel
-          # live happy in stone castle until end of time     
+          # live happy in stone castle until end of time
        }
      };
-     
+
   print Prince->HomeDir; # back in /wooden/house when no kiss
-  
+
 =head1 DESCRIPTION
 
 This is an alternative to Class::Data::Inheritable with the feature
@@ -117,9 +150,9 @@ than a move to this module will break your code.
 
    Stuff->DataFile(@args); # make sure @args <= 1 or
                            # unwanted things will happen
-                    
-=head2 Localize Class Data                    
-                           
+
+=head2 Localize Class Data
+
 To localize a value give the accessor a lexical variable as second 
 argument. Under the hood this module uses than the function of 
 L<ReleaseAction> to provide the feature. It stores in the variable an

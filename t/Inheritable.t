@@ -3,8 +3,8 @@ use Test::More tests => 15;
 
 package Ray;
 use base qw(Class::Data::Localize);
-Ray->class_accessor('Ubu');
-Ray->class_accessor(DataFile => '/etc/stuff/data');
+Ray->mk_classdata('Ubu');
+Ray->mk_classdata(DataFile => '/etc/stuff/data');
 
 package Gun;
 use base qw(Ray);
@@ -18,7 +18,7 @@ package main;
 
 foreach my $class (qw/Ray Gun Suitcase/) { 
 	can_ok $class => 
-		qw/class_accessor Ubu _Ubu_accessor DataFile _DataFile_accessor/;
+		qw/mk_classdata Ubu _Ubu_accessor DataFile _DataFile_accessor/;
 }
 
 # Test that superclasses effect children.
@@ -39,8 +39,8 @@ is +Suitcase->DataFile, '/etc/otherstuff/data', "but not to changed";
 
 
 my $obj = bless {}, 'Gun';
-eval { $obj->class_accessor('Ubu') };
-ok $@ =~ /^class_accessor\(\) is a class method, not an object method/,
+eval { $obj->mk_classdata('Ubu') };
+ok $@ =~ /^mk_classdata\(\) is a class method, not an object method/,
 "Can't create classdata for an object";
 
 is $obj->DataFile, "/tmp/stuff", "But objects can access the data";
