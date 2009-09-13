@@ -93,11 +93,13 @@ our %methods;
 
             $methods{'mk_classdata'}->($declaredclass, $attribute, undef);
             $accessor = $methods{'lazy_default'}->($declaredclass, $attribute, $code);
+            local $warn_redefine;
+            $methods{'make_accessor'}->($declaredclass,$attribute,$accessor)
         }
         else {
             $accessor = $methods{'class_accessor'}->($declaredclass, $attribute, $args[0]);
+            $methods{'make_accessor'}->($declaredclass,$attribute,$accessor)
         }
-        $methods{'make_accessor'}->($declaredclass,$attribute,$accessor)
     }
 );
 
