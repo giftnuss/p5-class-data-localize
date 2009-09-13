@@ -5,10 +5,10 @@ use Test::More;
 BEGIN 
   { eval { require Test::Distribution; };
 
-  if ($@) { 
+  if ($@) {
       plan skip_all => 'Test::Distribution not installed'
   }
-  else { 
+  else {
       import Test::Distribution::
   }
 }

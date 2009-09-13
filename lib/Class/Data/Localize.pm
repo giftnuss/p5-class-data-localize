@@ -103,7 +103,7 @@ our %methods;
     }
 );
 
-*mk_classdata = $methods{'mk_classdata'}; 
+*mk_classdata = $methods{'mk_classdata'};
 
 1;
 

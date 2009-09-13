@@ -53,8 +53,8 @@ Prince->HomeDir('/wooden/house');
 # Teporary move to
 { Prince->HomeDir('/stone/castle',my $move);
   if(Prince->kiss('princess')) {
-          $move->cancel ;    
+          $move->cancel ;
   }
 };
-     
+
 is +Prince->HomeDir,'/stone/castle','canceled localization';
