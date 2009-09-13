@@ -3,9 +3,11 @@ lib/Class/Data/Localize.pm
 MANIFEST			This list of files
 README
 Changes
-t/Inheritable.t
-t/Localizable.t
-t/pod-coverage.t
-t/pod.t
+t/01_inheritable.t
+t/02_localizable.t
+t/03_lazydefault.t
+t/97_distribution.t
+t/98_pod_coverage.t
+t/99_pod.t
 Makefile.PL
 META.yml
