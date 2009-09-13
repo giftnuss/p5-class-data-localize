@@ -2,7 +2,7 @@
 use strict;
 use Test::More;
 
-BEGIN 
+BEGIN
   { eval { require Test::Distribution; };
 
   if ($@) {

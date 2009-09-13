@@ -34,7 +34,7 @@ is +Ray->Ubu, undef, "But not set in parent";
   { Gun->Ubu('dup',my $local);
     is +Gun->Ubu,'dup', 'Inner localized value';
   };
-  is +Gun->Ubu,'Tremolo', 'Outer localized value'; 
+  is +Gun->Ubu,'Tremolo', 'Outer localized value';
 };
 
 package Prince;

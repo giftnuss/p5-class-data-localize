@@ -40,9 +40,9 @@ our %methods;
             if(@_==3) {
                 my $current = $data;
                 my $stacked = $_[2]; # maybe a lazy default release action
-                $_[2] = ReleaseAction->new(sub { 
+                $_[2] = ReleaseAction->new(sub {
                     $data = $current;
-                    undef($stacked); 
+                    undef($stacked);
                 });
 
                 if($wantclass ne $declaredclass){
@@ -155,11 +155,11 @@ than a move to this module will break your code.
 
 =head2 Localize Class Data
 
-To localize a value give the accessor a lexical variable as second 
-argument. Under the hood this module uses than the function of 
+To localize a value give the accessor a lexical variable as second
+argument. Under the hood this module uses than the function of
 L<ReleaseAction> to provide the feature. It stores in the variable an
-ReleaseAction object. This let's cancel the localization before the 
-variable goes out of scope. When canceled the localized value becomes 
+ReleaseAction object. This let's cancel the localization before the
+variable goes out of scope. When canceled the localized value becomes
 the new persistent value.
 
 =head2 Lazy Default Value

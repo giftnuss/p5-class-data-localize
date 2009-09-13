@@ -28,7 +28,6 @@ ok(1);
 
 foreach my $filename (keys %{$manifest}) {
     next if exists $skipfor{$filename};
-    print "Space test of: $filename\n";
     my $wholefile = $slurp->($filename);
-    ok($wholefile && $wholefile !~ /[ \t]+\n/,"no trailing space in $filename");
+    ok($wholefile && !($wholefile =~ /(.{0,10})[ \t]+$/m),"no trailing space in $filename " . ($1||""));
 }
