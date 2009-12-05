@@ -1,22 +1,24 @@
 ---
 name: Class-Data-Localize
-version: 0.02
+version: 0.03_2
 author:
   - 'Sebastian Knapp <sk@computer-leipzig.com>'
-abstract: 'Localizable, inheritable, overridable class data'
+abstract: 'Lazy, localizable, inheritable, overridable class data'
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
-requires:
-  ReleaseAction: 0
-  perl: 5.6.0
 build_requires:
   Test::More: 0
+requires:
+  ReleaseAction: 0
+  perl: v5.6.0
+configure_requires:
+  Module::Build: 0.35
 provides:
   Class::Data::Localize:
     file: lib/Class/Data/Localize.pm
-    version: 0.02
-generated_by: Module::Build version 0.2808
+    version: 0.03_2
+generated_by: Module::Build version 0.35
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4

@@ -6,7 +6,7 @@ my $builder = Module::Build->new(
     module_name         => 'Class::Data::Localize',
     license             => 'perl',
     dist_author         => 'Sebastian Knapp <sk@computer-leipzig.com>',
-    dist_version        => '0.03_2',
+    dist_version        => '0.03_3',
     dist_abstract       => 
       'Lazy, localizable, inheritable, overridable class data',
     requires => {
@@ -15,6 +15,7 @@ my $builder = Module::Build->new(
     },
     build_requires => {
         'Test::More' => 0,
+        'Test::NoWarnings' => 0
     },
     add_to_cleanup      => [ 'Class-Data-Localize-*' ],
 	create_makefile_pl  => 'traditional', 

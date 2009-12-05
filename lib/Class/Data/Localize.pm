@@ -2,7 +2,7 @@ package Class::Data::Localize;
 
 use strict qw(vars subs);
 use vars qw($VERSION);
-$VERSION = '0.03_2';
+$VERSION = '0.03_3';
 
 use ReleaseAction ();
 
@@ -172,6 +172,20 @@ The return value of the code reference will be used as default value
 when the accessor is called with an undefined value the first time. This
 works together with the localize class data feature, but not
 perfectly. Inheritance needs more tests when both play together.
+
+=head2 Restrictions
+
+It is not possible to override an attribute in a subclass, which calls the
+attribute in the base class.
+
+   package Duke;
+   use base 'Prince';
+
+   # this does not work
+   sub HomeDir {
+     my $self = shift;
+     $self->SUPER::HomeDir(@_);
+   }
 
 =head1 SEE ALSO
 

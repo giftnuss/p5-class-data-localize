@@ -1,5 +1,7 @@
 use strict;
-use Test::More tests => 9;
+use Test::More tests => 13;
+use Test::NoWarnings;
+use Test::Warn;
 
 package Ray;
 use base qw(Class::Data::Localize);
@@ -58,3 +60,23 @@ Prince->HomeDir('/wooden/house');
 };
 
 is +Prince->HomeDir,'/stone/castle','canceled localization';
+
+# this is interesting if it works
+package Duke;
+use base 'Prince';
+
+sub HomeDir {
+  my $self = shift;
+  $self->SUPER::HomeDir(@_)
+}
+
+package main;
+warning_like {Duke->HomeDir('/Palace/')} qr/Subroutine [\w:]+ redefined/i, "a subroutine redefined warning";
+
+{ Duke->HomeDir('/Place/Under/Bridge',my $r);
+  is(+Duke->HomeDir,'/Place/Under/Bridge','localize with delegation');
+};
+is(+Duke->HomeDir,'/Palace/','old value is back');
+
+
+#done_testing;
