@@ -2,7 +2,7 @@ package Class::Data::Localize;
 
 use strict qw(vars subs);
 use vars qw($VERSION);
-$VERSION = '0.02';
+$VERSION = '0.04';
 
 use ReleaseAction ();
 
@@ -16,17 +16,17 @@ sub mk_classdata {
 
     my $accessor = sub {
         my $wantclass = ref($_[0]) || $_[0];
-        
+
         if(@_==3) {
             my $current = $data;
             $_[2] = ReleaseAction->new( sub { $data = $current } );
-            
+
             if($wantclass ne $declaredclass){
-                return $wantclass->mk_classdata($attribute,$data)->(@_);
+                return mk_classdata($wantclass,$attribute,$data)->(@_);
             }
         }
         else {
-            return $wantclass->mk_classdata($attribute)->(@_)
+            return mk_classdata($wantclass,$attribute)->(@_)
               if @_>1 && $wantclass ne $declaredclass;
         }
         $data = $_[1] if @_>1;
@@ -61,12 +61,12 @@ Class::Data::Localize - Localizable, inheritable, overridable class data
      { Prince->HomeDir('/stone/castle',my $move);
        if(Prince->kiss("princess")) {
           $move->cancel
-          # live happy in stone castle until end of time     
+          # live happy in stone castle until end of time
        }
      };
-     
+
   print Prince->HomeDir; # back in /wooden/house when no kiss
-  
+
 =head1 DESCRIPTION
 
 This is an alternative to Class::Data::Inheritable with the feature
@@ -77,6 +77,17 @@ of the keyword C<local>.
 
 This class method works the same way as in C::D::I.
 
+Since version 0.04 it is no longer a requirement to inherit from
+C<Class::Data::Localize>, because C<mk_classdata> is usable as a 
+class function.
+
+  package Mir;
+
+  { my ($mkcd,$self) = (\&Class::Data::Localize::mk_classdata,__PACKAGE__);
+    $mkcd->($self,'attribute1' => 9);
+    ...
+  }
+
 =head2 Compatibility
 
 It is mostly compatible with C::D::I but attention should on the accessor
@@ -85,9 +96,9 @@ than a move to this module will break your code.
 
    Stuff->DataFile(@args); # make sure @args <= 1 or
                            # unwanted things will happen
-                    
+
 =head2 Localize Class Data                    
-                           
+
 To localize a value give the accessor a lexical variable as second 
 argument. Under the hood this module uses than the function of 
 L<ReleaseAction> to provide the feature. It stores in the variable an

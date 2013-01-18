@@ -4,6 +4,7 @@
 ,v$
 \B\.svn\b
 \B\.cvsignore$
+\B\.git\b
 
 # Avoid Makemaker generated and utility files.
 \bMakefile$
@@ -37,3 +38,4 @@
 \B\._
 # Avoid archives of this distribution
 \bClass-Data-Localize-[\d\.\_]+
+^MYMETA.yml$
