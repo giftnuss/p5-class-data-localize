@@ -6,7 +6,7 @@ my $builder = Module::Build->new(
     module_name         => 'Class::Data::Localize',
     license             => 'perl',
     dist_author         => 'Sebastian Knapp <sk@computer-leipzig.com>',
-    dist_version        => '0.04',
+    dist_version        => '0.0401',
     dist_abstract       => 
       'Localizable, inheritable, overridable class data',
     requires => {

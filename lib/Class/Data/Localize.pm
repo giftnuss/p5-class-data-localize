@@ -2,7 +2,7 @@ package Class::Data::Localize;
 
 use strict qw(vars subs);
 use vars qw($VERSION);
-$VERSION = '0.04';
+$VERSION = '0.0401';
 
 use ReleaseAction ();
 
